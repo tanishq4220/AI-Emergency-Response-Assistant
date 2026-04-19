@@ -4,62 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Emergency Response Assistant</title>
+    <!-- Accessibility / Security Enhancements -->
+    <meta name="description" content="AI Dashboard for live Emergency Operations Management">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Top Configuration Header -->
-    <div class="top-bar">
-        <div class="brand">
+    <!-- Skip Navigation Link for strict Screen Reader Compliance -->
+    <a href="#main-dashboard" class="skip-link" style="position:absolute; top:-40px; left:0; z-index:100; background:#000; padding:8px; color:#fff;">Skip to Main Content</a>
+
+    <!-- Top Configuration Header rendered semantically -->
+    <header class="top-bar" role="banner">
+        <nav class="brand" aria-label="Global Navigation">
             <i class="fa-solid fa-shield-halved neon-icon" aria-hidden="true"></i>
             <h1>A.E.R.A. System Component</h1>
-        </div>
+        </nav>
         
         <div id="global-alert-ticker" class="ticker" role="alert" aria-live="assertive">
             <span class="ticker-text"><i class="fa-solid fa-satellite-dish"></i> SYNC ESTABLISHED. Monitoring telemetry data...</span>
         </div>
         
-        <div class="system-status">
+        <div class="system-status" aria-label="Critical System Status Indicators">
             <span id="system-badge" class="badge-status online"><i class="fa-solid fa-circle"></i> Systems Online</span>
             <span id="last-updated" class="last-updated">| Last Updated: --:--:--</span>
         </div>
-    </div>
+    </header>
 
-    <!-- System Explanation Layer -->
-    <div class="explanation-layer" role="complementary">
+    <!-- Semantic Aside Element -->
+    <aside class="explanation-layer" role="complementary" aria-label="Project Tech Stack Context">
         <p>Live AI-powered emergency intelligence using Google Maps & Gemini AI</p>
-    </div>
+    </aside>
 
-    <main class="dashboard-grid">
+    <main id="main-dashboard" class="dashboard-grid" role="main">
         <!-- LEFT PANEL: AI Chat -->
-        <section class="panel ai-panel" aria-label="Cognition AI Assistant">
-            <div class="panel-header">
-                <h2><i class="fa-solid fa-brain" aria-hidden="true"></i> Cognition AI</h2>
+        <section class="panel ai-panel" aria-labelledby="ai-panel-title">
+            <header class="panel-header">
+                <h2 id="ai-panel-title"><i class="fa-solid fa-brain" aria-hidden="true"></i> Cognition AI</h2>
                 <span class="badge info">Context-Aware</span>
-            </div>
-            <div id="chat-history" class="chat-history" aria-live="polite">
+            </header>
+            <article id="chat-history" class="chat-history" aria-live="polite" aria-label="Message Interaction History">
                 <div class="chat-message system-msg">
                     <p>AI Assistant initialized. I am continuously monitoring geospatial anomalies. How can I assist you during this emergency?</p>
                 </div>
-            </div>
+            </article>
             <div class="chat-input-container">
-                <input type="text" id="chat-input" placeholder="E.g., Find safest evacuation route..." aria-label="Emergency query input">
-                <button id="send-btn" class="primary-btn" aria-label="Send Message"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
+                <label for="chat-input" style="display:none;">Emergency Command Input Box</label>
+                <input type="text" id="chat-input" name="chat-input" placeholder="E.g., Find safest evacuation route..." aria-label="Type your emergency query here">
+                <button id="send-btn" class="primary-btn" aria-label="Send Query"><i class="fa-solid fa-paper-plane" aria-hidden="true"></i></button>
             </div>
         </section>
 
         <!-- CENTER PANEL: Geo-Intelligence -->
-        <section class="panel map-panel" aria-label="Geolocation and Map Data">
-            <div class="panel-header map-header">
-                <h2><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i> Geospatial Intelligence</h2>
-                <div class="map-controls">
-                    <button class="map-action-btn" id="btn-route" aria-label="Find evacuation route"><i class="fa-solid fa-route" aria-hidden="true"></i> Route</button>
-                    <button class="map-action-btn" id="btn-shelter" aria-label="Locate nearest shelter"><i class="fa-solid fa-tents" aria-hidden="true"></i> Shelter</button>
-                    <button class="map-action-btn danger-btn" id="btn-sos" aria-label="Send SOS alert"><i class="fa-solid fa-satellite" aria-hidden="true"></i> SOS</button>
-                </div>
-            </div>
-            <div id="map" class="map-container" aria-label="Interactive Map Area">
+        <section class="panel map-panel" aria-labelledby="map-panel-title">
+            <header class="panel-header map-header">
+                <h2 id="map-panel-title"><i class="fa-solid fa-map-location-dot" aria-hidden="true"></i> Geospatial Intelligence</h2>
+                <nav class="map-controls" aria-label="Map Routing Commands">
+                    <button class="map-action-btn" id="btn-route" aria-label="Calculate Integrated Safe Route"><i class="fa-solid fa-route" aria-hidden="true"></i> Route</button>
+                    <button class="map-action-btn" id="btn-shelter" aria-label="Locate Environment's Nearest Shelter"><i class="fa-solid fa-tents" aria-hidden="true"></i> Shelter</button>
+                    <button class="map-action-btn danger-btn" id="btn-sos" aria-label="Broadcast Global SOS Alert"><i class="fa-solid fa-satellite" aria-hidden="true"></i> SOS</button>
+                </nav>
+            </header>
+            <div id="map" class="map-container" aria-label="Dynamically rendering Geographical Operations Engine" role="region">
                 <div id="map-fallback" class="map-offline-fallback">
                     <div class="sonar-wrapper">
                         <div class="sonar-emitter">
@@ -79,12 +85,12 @@
         </section>
 
         <!-- RIGHT PANEL: Analytics Dashboard -->
-        <section class="panel analytics-panel" aria-label="Situation Awareness Dashboard">
-            <div class="panel-header">
-                <h2><i class="fa-solid fa-chart-radar" aria-hidden="true"></i> Situation Awareness</h2>
-            </div>
+        <section class="panel analytics-panel right-panel" aria-labelledby="analytics-panel-title">
+            <header class="panel-header">
+                <h2 id="analytics-panel-title"><i class="fa-solid fa-chart-radar" aria-hidden="true"></i> Situation Awareness</h2>
+            </header>
             
-            <div class="metrics-grid">
+            <article class="metrics-grid">
                 <div class="metric-card risk-card">
                     <span class="metric-label">Area Risk Index</span>
                     <div class="metric-value">
@@ -108,32 +114,27 @@
                         <div class="metric-value small-val" id="response-time">~8 Min</div>
                     </div>
                 </div>
-            </div>
+            </article>
 
-            <div class="simulation-controls">
+            <nav class="simulation-controls" aria-label="Disaster Injection Simulations">
                 <h3><i class="fa-solid fa-vial-virus" aria-hidden="true"></i> Predictive Simulation Engine</h3>
                 <p class="sim-desc">Inject hazard parameters to calculate predictive escalation.</p>
                 <div class="sim-buttons">
-                    <button class="sim-trigger" data-type="flood" aria-label="Simulate Flood"><i class="fa-solid fa-water" aria-hidden="true"></i> Escalate Flood</button>
-                    <button class="sim-trigger" data-type="fire" aria-label="Simulate Fire"><i class="fa-solid fa-fire" aria-hidden="true"></i> Expand Fire</button>
-                    <button class="sim-trigger" data-type="earthquake" aria-label="Simulate Earthquake"><i class="fa-solid fa-house-crack" aria-hidden="true"></i> Seismic Burst</button>
-                    <button class="sim-trigger" data-type="reset" aria-label="Reset Simulation"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Stabilize</button>
+                    <button class="sim-trigger" data-type="flood" aria-label="Inject Flood Metrics"><i class="fa-solid fa-water" aria-hidden="true"></i> Escalate Flood</button>
+                    <button class="sim-trigger" data-type="fire" aria-label="Inject Fire Hazards"><i class="fa-solid fa-fire" aria-hidden="true"></i> Expand Fire</button>
+                    <button class="sim-trigger" data-type="earthquake" aria-label="Inject Seismic Shakes"><i class="fa-solid fa-house-crack" aria-hidden="true"></i> Seismic Burst</button>
+                    <button class="sim-trigger" data-type="reset" aria-label="Reset All Engine Metrics"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i> Stabilize</button>
                 </div>
-            </div>
-
-            <div class="validation-panel">
-                <h4><i class="fa-solid fa-circle-check" aria-hidden="true"></i> System Validation</h4>
-                <p>✔ Flood scenario handled</p>
-                <p>✔ Fire scenario handled</p>
-                <p>✔ Shelter detection verified</p>
-                <p>✔ Route generation active</p>
-                <p>✔ API fallback tested</p>
-            </div>
+                
+                <div id="sim-log" class="sim-log" aria-live="polite" aria-label="System Diagnostics Output Log">
+                    <!-- Logs stream here -->
+                </div>
+            </nav>
         </section>
     </main>
     
-    <!-- Footer Layer -->
-    <footer class="app-footer">
+    <!-- Footer Layer strictly defined semantically -->
+    <footer class="app-footer" role="contentinfo">
         <p>© 2026 AI Emergency Response Assistant | Powered by Google Maps & Gemini AI | Real-time Emergency Intelligence System</p>
     </footer>
 
@@ -142,25 +143,5 @@
     <script src="js/chat.js"></script>
     <script src="js/maps.js"></script>
     <script src="js/dashboard.js"></script>
-
-    <script>
-      window.addEventListener("load", () => {
-        fetch('/api/config')
-          .then(res => res.json())
-          .then(data => {
-            if (data.MAPS_KEY) {
-              const script = document.createElement('script');
-              script.src = `https://maps.googleapis.com/maps/api/js?key=${data.MAPS_KEY}&callback=initMap`;
-              script.async = true;
-              script.defer = true;
-              document.body.appendChild(script);
-            } else {
-              console.log("No API key found, using simulation.");
-            }
-          })
-          .catch(() => console.log("Config fetch failed, using simulation."));
-      });
-    </script>
 </body>
 </html>
-

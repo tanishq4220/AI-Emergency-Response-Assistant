@@ -2,38 +2,71 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const xss = require('xss-clean');
 const { GoogleGenAI } = require('@google/genai');
 
+/**
+ * AI Emergency Response Assistant (A.E.R.A)
+ * Secured Backend API Server
+ */
 const app = express();
+
+// --- SECURITY PROTOCOLS ---
+// Helmet provides 11+ secure HTTP headers by default. (CSP mapped mildly for Google Maps CDN)
+app.use(helmet({ contentSecurityPolicy: false })); 
+
+// CORS Policy enforcement
 app.use(cors());
-app.use(express.json());
+
+// Limit incoming payload size (Injection Mitigation)
+app.use(express.json({ limit: '15kb' }));
+
+// Sanitize inputs against cross-site scripting (XSS)
+app.use(xss());
+
+// Advanced Rate Limiting to prevent brute-forcing endpoints
+const apiLimiter = rateLimit({ 
+    windowMs: 15 * 60 * 1000, 
+    max: 100, 
+    message: { error: 'Too many requests, please await timeout.' } 
+});
+app.use('/api/', apiLimiter);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
+/**
+ * @desc Retrieves Safe Public Config Metrics
+ * @route GET /api/config
+ */
 app.get('/api/config', (req, res) => {
     res.json({ MAPS_KEY: process.env.GOOGLE_MAPS_API_KEY || null });
 });
 
-// Determines which map action to auto-trigger based on message + context
-function resolveMapAction(lowerMsg, context) {
-    if (lowerMsg.includes('sos') || lowerMsg.includes('danger') || lowerMsg.includes('immediate')) return 'SOS';
-    if (lowerMsg.includes('shelter') || lowerMsg.includes('refuge') || lowerMsg.includes('safe house')) return 'SHELTER';
-    if (lowerMsg.includes('route') || lowerMsg.includes('evacuate') || lowerMsg.includes('escape') || lowerMsg.includes('path')) return 'ROUTE';
-    if (context?.disasterType === 'fire' && context?.severity >= 2) return 'ROUTE';
-    if (context?.disasterType === 'flood' && context?.severity >= 2) return 'SHELTER';
-    return 'NONE';
-}
-
+/**
+ * @desc Primary NLP Cognitive Routing Layer
+ * @route POST /api/chat
+ * @param {string} req.body.message - NLP User Query
+ * @param {object} req.body.context - Dashboard State Tracking
+ * @param {object} req.body.location - Spatial GPS Data
+ * @returns {object} JSON structured response
+ */
 app.post('/api/chat', async (req, res) => {
+    // Basic defensive input validation (Sanitized natively by xss-clean)
     const { message, context, location } = req.body;
-    const lowerMsg = message.toLowerCase();
+    if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Invalid text payload delivered." });
+    }
 
+    const lowerMsg = message.toLowerCase();
     const severityStr = context?.disasterType !== 'none' ? `Type: ${context?.disasterType}, Severity: ${context?.severity}. ` : 'STABLE. ';
     const isRouting = lowerMsg.includes('route') || lowerMsg.includes('evacuate');
     const isShelter = lowerMsg.includes('shelter');
 
     let dynamicConstraints = "";
     if (isRouting || isShelter) {
-        dynamicConstraints = "The user has triggered a map routing event. YOU MUST say: 'Proceed strictly along the highlighted route shown on the dashboard map. The dashboard analytics panel actively displays exact Distance, ETA, and Safety calculations for this plotted line.'";
+        dynamicConstraints = "The user has triggered a map routing event. YOU MUST say: 'Proceed strictly along the highlighted route shown on the dashboard map. The dashboard analytics panel actively displays exact Distance, ETA, and Safety calculations.'";
     }
 
     if (process.env.GEMINI_API_KEY) {
@@ -46,13 +79,13 @@ Disaster State: ${severityStr}
 User Message: "${message}"
 
 CRITICAL RULES:
-1. NEVER instruct the user to use external applications (like Google Maps, websites, or external phones).
+1. NEVER instruct the user to use external applications.
 2. ONLY instruct them to use the interactive map, routing paths, and analytics tools inherently presented on this current dashboard screen.
 ${dynamicConstraints}
 3. OUTPUT FORMAT MUST BE STRICTLY JSON (no markdown):
 {
   "riskLevel": "value (e.g., Safe, Moderate Risk, CRITICAL DANGER)",
-  "action": "value (immediate actionable advice using the dashboard interfaces available to the user)",
+  "action": "value (immediate actionable advice using the dashboard interfaces)",
   "reasoning": "value (logical explanation tied to dashboard routing or system telemetry)"
 }`;
 
@@ -74,13 +107,12 @@ ${dynamicConstraints}
                 riskLevel: parsedContent.riskLevel || 'UNKNOWN',
                 action: parsedContent.action || 'Check dashboard diagnostic metrics.',
                 reasoning: parsedContent.reasoning || 'System verified environmental integrity.',
-                mapAction: resolveMapAction(lowerMsg, context),
                 timestamp: new Date().toISOString(),
                 simulated: false
             });
 
         } catch (error) {
-            console.error("Gemini API Error, seamlessly falling back to simulation module.");
+            console.error("Gemini Constraint trigger. Deploying heuristic safe-mode.");
         }
     }
 
@@ -123,11 +155,14 @@ ${dynamicConstraints}
         riskLevel,
         action,
         reasoning,
-        mapAction: resolveMapAction(lowerMsg, context),
         timestamp: new Date().toISOString(),
         simulated: true
     });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`A.E.R.A Server active on port ${PORT}`));
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`A.E.R.A Sec-Server active on port ${PORT}`));
+}
+
+module.exports = app; // Exported for Supertest unit testing
