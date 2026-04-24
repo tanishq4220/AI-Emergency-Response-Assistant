@@ -14,8 +14,13 @@ const { GoogleGenAI } = require('@google/genai');
 const app = express();
 
 // --- SECURITY PROTOCOLS ---
-// Helmet provides 11+ secure HTTP headers by default. (CSP mapped mildly for Google Maps CDN)
-app.use(helmet({ contentSecurityPolicy: false })); 
+// Helmet provides 11+ secure HTTP headers. (Disabled cross-origin checks specifically to allow Google Maps CDN to execute dynamically)
+app.use(helmet({ 
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false
+})); 
 
 // CORS Policy enforcement
 app.use(cors());
